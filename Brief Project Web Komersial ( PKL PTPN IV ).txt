@@ -1,6 +1,6 @@
 Brief Project Web Komersial 
 10 Februari 2026
 
-Tech Requirements	: Front-End : HTML5, TailwindCSS, JavaScript
-			  Back-End  : PHP Native
-			  Database  : SQL Servel 
+Tech Requirements	:	Front-End : HTML5, TailwindCSS, JavaScript
+			  			Back-End  : PHP Native
+			  			Database  : SQL Servel 
