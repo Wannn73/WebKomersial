@@ -4,3 +4,6 @@ Brief Project Web Komersial
 Tech Requirements	:	Front-End : HTML5, TailwindCSS, JavaScript
 			  			Back-End  : PHP Native
 			  			Database  : SQL Servel 
+Roles Define Access :	Admin
+						User
+
