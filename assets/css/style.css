@@ -1,0 +1,122 @@
+/* Custom Styles for Web Komersial */
+
+/* Glassmorphism Utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Calendar Styles */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.calendar-day:hover:not(.disabled):not(.empty) {
+    background-color: #eff6ff;
+    color: #2463eb;
+    font-weight: bold;
+}
+
+.calendar-day.empty {
+    cursor: default;
+    background: transparent;
+}
+
+.calendar-day.today {
+    border: 2px solid #2463eb;
+    color: #2463eb;
+    font-weight: bold;
+}
+
+
+.calendar-day.booked {
+    background-color: #e2e8f0;
+    /* Gray-200 */
+    color: #94a3b8;
+    /* Slate-400 */
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.calendar-day.holiday {
+    color: #ef4444;
+    /* Red-500 */
+}
+
+/* Ensure booked state overrides holiday color if needed, or handle in JS */
+.calendar-day.booked.holiday {
+    color: #94a3b8;
+}
+
+.calendar-day.selected {
+    background-color: #2463eb;
+    color: white;
+}
+
+/* Chatbot Styles */
+.chat-window {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: bottom right;
+}
+
+.chat-message {
+    max-width: 80%;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.chat-message.user {
+    background-color: #2463eb;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.chat-message.bot {
+    background-color: #f1f5f9;
+    color: #334155;
+    margin-right: auto;
+    border-bottom-left-radius: 0.25rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
