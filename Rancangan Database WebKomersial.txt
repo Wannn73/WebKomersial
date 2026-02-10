@@ -9,7 +9,8 @@ field:
   	nama_acara	: varchar(200)
   	tgl_mulai	: date
   	tgl_selesai	: date
-  	jam_acara	: varchar
+  	jam_acara	: varchar(50)
   	jumlah_tamu	: int
   	created_at	: datetime
+
 
