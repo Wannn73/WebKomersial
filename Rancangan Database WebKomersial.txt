@@ -1,0 +1,14 @@
+Nama db : DB_SEWAGEDUNG
+
+table 1 : bookings 
+field:
+	id_booking	: Primary Key 
+  	nama_lengkap	: varchar(150)
+  	whatsapp 	: varchar(20)
+  	email 		: varchar(100)
+  	nama_acara	: varchar(200)
+  	tgl_mulai	: date
+  	tgl_selesai	: date
+  	jam_acara	: varchar
+  	jumlah_tamu	: int
+  	created_at	: datetime
