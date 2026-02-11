@@ -3,7 +3,7 @@ Brief Project Web Komersial
 
 Tech Requirements	:	Front-End : HTML5, TailwindCSS, JavaScript
 			  			Back-End  : PHP Native
-			  			Database  : SQL Server
+			  			Database  : MySQL
 Roles Define Access :	Admin
 						User
 Main Features		:	Navbar (Beranda, Tentang Kami, Fasilitas, Galeri, Kontak 
@@ -12,3 +12,4 @@ Main Features		:	Navbar (Beranda, Tentang Kami, Fasilitas, Galeri, Kontak
 						Chat Bot
 Access Permission	: 	Admin => Access all features
 						User  => Input on legal advice 
+
