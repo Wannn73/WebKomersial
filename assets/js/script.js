@@ -488,6 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatMessages = document.getElementById('chat-messages');
     const chatSend = document.getElementById('chat-send');
 
+<<<<<<< HEAD
     // Generate or retrieve Session ID
     function getChatSessionId() {
         let sessionId = localStorage.getItem('chat_session_id');
@@ -498,6 +499,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return sessionId;
     }
 
+=======
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
     // Toggle chat window
     if (chatBtn && chatWindow) {
         chatBtn.addEventListener('click', () => {
@@ -533,8 +536,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const typingIndicator = document.createElement('div');
         typingIndicator.className = 'chat-message bot shadow-sm';
         typingIndicator.id = 'typing-indicator';
+<<<<<<< HEAD
         // Updated loading text as requested
         typingIndicator.innerHTML = '<span class="flex items-center gap-2"><span class="animate-spin material-icons text-sm">sync</span> Sedang mengecek database...</span>';
+=======
+        typingIndicator.innerHTML = '<span class="animate-pulse">Mengetik...</span>';
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
         chatMessages.appendChild(typingIndicator);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -543,17 +550,24 @@ document.addEventListener('DOMContentLoaded', function () {
         chatInput.disabled = true;
 
         try {
+<<<<<<< HEAD
             const sessionId = getChatSessionId();
 
+=======
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
             const response = await fetch('api/chatbot_bridge.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+<<<<<<< HEAD
                 body: JSON.stringify({
                     message: message,
                     session_id: sessionId
                 })
+=======
+                body: JSON.stringify({ message: message })
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
             });
 
             const result = await response.json();
@@ -564,6 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Add bot response
             const botMsg = document.createElement('div');
             botMsg.className = 'chat-message bot shadow-sm';
+<<<<<<< HEAD
 
             // Handle output format as requested: { "output": "..." }
             if (result.output) {
@@ -573,6 +588,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.warn('Unexpected response format:', result);
             }
 
+=======
+            botMsg.textContent = result.reply || 'Maaf, terjadi kesalahan.';
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
             chatMessages.appendChild(botMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -584,10 +602,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('typing-indicator').remove();
             }
 
+<<<<<<< HEAD
             // Show polite error message
             const errorMsg = document.createElement('div');
             errorMsg.className = 'chat-message bot shadow-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400';
             errorMsg.textContent = '⚠️ Maaf, saya sedang mengalami kendala teknis. Mohon coba beberapa saat lagi.';
+=======
+            // Show error message
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'chat-message bot shadow-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400';
+            errorMsg.textContent = '⚠️ Maaf, sistem chatbot sedang sibuk. Silakan coba lagi.';
+>>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
             chatMessages.appendChild(errorMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } finally {
