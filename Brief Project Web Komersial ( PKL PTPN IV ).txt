@@ -6,10 +6,9 @@ Tech Requirements	:	Front-End : HTML5, TailwindCSS, JavaScript
 			  			Database  : MySQL
 Roles Define Access :	Admin
 						User
-Main Features		:	Navbar (Beranda, Tentang Kami, Fasilitas, Galeri, Kontak 
+Main Features		:	Navbar (Beranda, Tentang Kami, Fasilitas, Galeri, Kontak)
 						Form	
 						Kalender ( Cek ketersediaan )
 						Chat Bot
 Access Permission	: 	Admin => Access all features
 						User  => Input on legal advice 
-
