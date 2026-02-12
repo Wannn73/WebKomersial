@@ -544,15 +544,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const sessionId = getChatSessionId();
-            
+
             const response = await fetch('api/chatbot_bridge.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     message: message,
-                    session_id: sessionId 
+                    session_id: sessionId
                 })
             });
 
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Add bot response
             const botMsg = document.createElement('div');
             botMsg.className = 'chat-message bot shadow-sm';
-            
+
             // Handle output format as requested: { "output": "..." }
             if (result.output) {
                 botMsg.textContent = result.output;
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 botMsg.textContent = 'Maaf, format respon tidak sesuai.';
                 console.warn('Unexpected response format:', result);
             }
-            
+
             chatMessages.appendChild(botMsg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
