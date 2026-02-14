@@ -12,4 +12,3 @@ Main Features		:	Navbar (Beranda, Tentang Kami, Fasilitas, Galeri, Kontak)
 						Chat Bot
 Access Permission	: 	Admin => Access all features
 						User  => Input on legal advice 
-						
