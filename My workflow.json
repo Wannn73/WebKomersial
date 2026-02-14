@@ -1,0 +1,225 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-ai",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a29c7465-4f2c-4dfb-98b7-ca45865a9e5c",
+      "name": "Webhook",
+      "webhookId": "04d06671-31ae-4b63-a64c-b0139fed266f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "=Anda adalah 'Lia', Senior Sales Consultant di GrandHall, sebuah venue acara premium. Persona Anda adalah: Mewah, Sangat Ramah, Proaktif, dan 'Helpful' (layaknya resepsionis hotel bintang 5).\n\nTUGAS ANDA:\n1.  Jawab pertanyaan dengan Bahasa Indonesia yang formal namun hangat (gunakan sapaan 'Bapak/Ibu' atau 'Kak').\n2.  Fokus pada SOLUSI dan CLOSING (ajakan reservasi).\n3.  JANGAN gunakan istilah teknis (database, query, sql, tool). Gunakan kalimat: \"Saya cek ketersediaannya sebentar\", \"Berdasarkan jadwal kami\", dll.\n4.  Jika jadwal KOSONG: \"Kabar baik! Tanggal tersebut tersedia. Mau saya bantu kunci jadwalnya sekarang?\"\n5.  Jika jadwal PENUH: \"Mohon maaf, tanggal tersebut sudah terisi. Namun kami masih punya slot di tanggal ...\"\n\nATURAN PRE-CHAT & INPUT:\n- Jika user mengirim pesan 'START' atau sapaan awal (halo/hi), JANGAN ANGGAP SEBAGAI PERTANYAAN. Langsung berikan SAPAAN SELAMAT DATANG + MENU UTAMA.\n- Contoh Sapaan: \"Selamat datang di GrandHall! Saya Lia, siap membantu Anda merencanakan acara impian. Ada yang bisa saya bantu?\"\n\nATURAN OUTPUT (PENTING):\nAnda WAJIB menjawab dalam format JSON murni TANPA Markdown block (jangan pakai ```json). Strukturnya:\n{\n  \"reply\": \"Jawaban verbal Anda di sini...\",\n  \"suggestions\": [\"Cek Harga\", \"Lihat Fasilitas\", \"Hubungi Admin\"]\n}\n\nPastikan 'suggestions' berisi maksimal 3 opsi singkat yang relevan dengan konteks percakapan untuk menuntun user melakukan pemesanan.\n\nDATA GRANDHALL:\n- Harga: Rp 100.000/hari\n- Lokasi: Jl. Sudirman 123 Jakarta\n- Fasilitas: AC Central, JBL Sound, VIP Room.\n\nJika user tanya catering/dekor: \"Kami memiliki vendor rekanan eksklusif...\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        460,
+        0
+      ],
+      "id": "57f4b93c-23c3-4596-9a9a-b05eb569f99d",
+      "name": "AI Agent",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        440,
+        240
+      ],
+      "id": "de8497c1-6987-4de1-9cab-f53c9700ccad",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "dUy5J9q7lh8J42pN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  let outputText = $input.item.json.output || $input.item.json.text || \"{}\";\n  \n  // Cleanup markdown if present\n  outputText = outputText.replace(/```json/g, '').replace(/```/g, '').trim();\n  \n  // Attempt search for JSON object if mixed with text\n  const jsonMatch = outputText.match(/\\{StrictJSONStart\\}?([\\s\\S]*)/) || outputText.match(/{[\\s\\S]*}/);\n  \n  let parsed = {};\n  if (jsonMatch) {\n      parsed = JSON.parse(jsonMatch[0]);\n  } else {\n      parsed = JSON.parse(outputText);\n  }\n\n  return {\n    reply: parsed.reply || \"Maaf, format respon tidak dikenali.\",\n    suggestions: parsed.suggestions || [\"Cek Harga\", \"Fasilitas\", \"Kontak Admin\"],\n    status: \"success\"\n  };\n  \n} catch (error) {\n  // Fallback: If AI fails to give JSON, use the raw text as reply\n  return {\n    reply: $input.item.json.output || \"Maaf, saya sedang membantu tamu lain. Bisa ulangi pertanyaannya?\",\n    suggestions: [\"Cek Ketersediaan\", \"Daftar Harga\", \"Bantuan\"],\n    status: \"success\",\n    error: error.message\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        0
+      ],
+      "id": "code-parser-node",
+      "name": "Parse JSON Output"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "91c57fef-c48f-4e8e-a7f2-246c139468bb",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.session_id || \"guest-session\" }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        240
+      ],
+      "id": "5cc1b66f-f5f1-49bf-af83-7dc4c9f0bb2b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "\"Gunakan alat ini untuk mengecek JADWAL/KETERSEDIAAN gedung. Wajib menyertakan parameter 'keyword' (string). Isi keyword dengan TANGGAL (YYYY-MM-DD) atau NAMA BULAN (misal: 'Juni') untuk melihat daftar tanggal yang SUDAH TERISI pada periode tersebut.\"",
+        "operation": "executeQuery",
+        "query": "={{ \"SELECT * FROM booking WHERE nama_lengkap LIKE '%\" + $fromAIArgs.keyword + \"%' OR tgl_mulai LIKE '%\" + $fromAIArgs.keyword + \"%' OR nama_acara LIKE '%\" + $fromAIArgs.keyword + \"%'\" }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySqlTool",
+      "typeVersion": 2.5,
+      "position": [
+        680,
+        240
+      ],
+      "id": "c595ac99-de04-42bb-8196-f1d4b4c4f3fb",
+      "name": "Execute a SQL query in MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "PUAqyGPpOfnesG1d",
+          "name": "MySQL account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "seconds": 45
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.schedule",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        0
+      ],
+      "id": "schedule-trigger-placeholder",
+      "name": "Schedule Trigger (Disabled)",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Output": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query in MySQL": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e67ce297-d584-439e-9a9a-f08dd651aecd",
+  "id": "IFbjUTFmZj0vLoIa4ZnjX",
+  "tags": []
+}

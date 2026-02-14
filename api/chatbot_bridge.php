@@ -20,7 +20,7 @@ if (empty($session_id)) {
 }
 
 // 2. n8n Configuration
-$n8n_webhook_url = 'https://alesia-unlegible-ungelatinously.ngrok-free.dev/webhook/chat-ai';
+$n8n_webhook_url = 'http://localhost:5678/webhook/chat-ai';
 
 // 3. Prepare Payload
 $payload = [
@@ -57,20 +57,8 @@ try {
 
     // Check if n8n returned success (usually 200) and valid JSON
     if ($http_code === 200 && $decoded_response) {
-        $bot_reply = "Maaf, saya tidak mengerti respon dari sistem.";
-
-        // Prioritize 'output' field
-        if (isset($decoded_response['output'])) {
-            $bot_reply = $decoded_response['output'];
-        } elseif (isset($decoded_response['reply'])) {
-            $bot_reply = $decoded_response['reply'];
-        } else {
-            // Fallback: try to find any string message
-            $bot_reply = isset($decoded_response['message']) ? $decoded_response['message'] : json_encode($decoded_response);
-        }
-
-        // Return 'output' to frontend
-        echo json_encode(['output' => $bot_reply]);
+        // Pass the full response from n8n (reply, suggestions, status)
+        echo json_encode($decoded_response);
     } else {
         // Error from n8n or non-200 OK
         $error_details = isset($decoded_response['message']) ? $decoded_response['message'] : substr($response, 0, 100);
