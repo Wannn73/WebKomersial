@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatMessages = document.getElementById('chat-messages');
     const chatSend = document.getElementById('chat-send');
 
-<<<<<<< HEAD
+
     // Generate or retrieve Session ID
     function getChatSessionId() {
         let sessionId = localStorage.getItem('chat_session_id');
@@ -499,17 +499,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return sessionId;
     }
 
-=======
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
-    // Toggle chat window
+
+    // === Chat Init Logic ===
+    let chatInitialized = false;
+
+    // Toggle chat window with Pre-Chat Template trigger
     if (chatBtn && chatWindow) {
         chatBtn.addEventListener('click', () => {
+            const isHidden = chatWindow.classList.contains('hidden');
+
             chatWindow.classList.toggle('hidden');
             chatWindow.classList.toggle('scale-0');
             chatWindow.classList.toggle('opacity-0');
+
             if (!chatWindow.classList.contains('hidden')) {
                 chatWindow.classList.remove('scale-0', 'opacity-0');
                 chatInput.focus();
+
+                // Trigger Greeting on First Open
+                if (!chatInitialized && chatMessages.children.length === 0) {
+                    chatInitialized = true;
+                    // Send silent 'START' signal
+                    sendChatMessage("START", true);
+                }
             }
         });
 
@@ -518,108 +530,128 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Send message function
-    async function sendChatMessage(message) {
-        if (!message.trim()) return;
+    // Suggestion rendering helper (Fixed Position)
+    function renderSuggestions(suggestions) {
+        const existingSuggestions = document.querySelectorAll('.chat-suggestions');
+        existingSuggestions.forEach(el => el.remove());
 
-        // Add user message to UI
-        const userMsg = document.createElement('div');
-        userMsg.className = 'chat-message user shadow-sm';
-        userMsg.textContent = message;
-        chatMessages.appendChild(userMsg);
+        if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) return;
+
+        const suggestionsContainer = document.createElement('div');
+        suggestionsContainer.className = 'chat-suggestions flex flex-wrap gap-2 p-2 bg-gray-50 border-t border-gray-100';
+        // Make it visible at the bottom of the chat area, above input
+        suggestionsContainer.style.position = 'sticky';
+        suggestionsContainer.style.bottom = '0';
+        suggestionsContainer.style.zIndex = '10';
+
+        suggestions.forEach(text => {
+            const btn = document.createElement('button');
+            btn.className = 'text-xs bg-white border border-primary text-primary px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors shadow-sm whitespace-nowrap';
+            btn.textContent = text;
+            btn.addEventListener('click', () => {
+                sendChatMessage(text);
+                suggestionsContainer.remove();
+            });
+            suggestionsContainer.appendChild(btn);
+        });
+
+        chatMessages.appendChild(suggestionsContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Send message function (Modified for Silent Send)
+    async function sendChatMessage(message, silent = false) {
+        if (!message || !message.trim()) return;
+
+        // Remove old suggestions
+        const oldSuggestions = document.querySelectorAll('.chat-suggestions');
+        oldSuggestions.forEach(el => el.remove());
+
+        // Add user message ONLY if NOT silent
+        if (!silent) {
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user shadow-sm';
+            userMsg.textContent = message;
+            chatMessages.appendChild(userMsg);
+        }
+
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Clear input
         chatInput.value = '';
+        if (!silent) {
+            chatSend.disabled = true;
+            chatInput.disabled = true;
+        }
 
-        // Show typing indicator
+        // Loading Indicator
         const typingIndicator = document.createElement('div');
         typingIndicator.className = 'chat-message bot shadow-sm';
         typingIndicator.id = 'typing-indicator';
-<<<<<<< HEAD
-        // Updated loading text as requested
-        typingIndicator.innerHTML = '<span class="flex items-center gap-2"><span class="animate-spin material-icons text-sm">sync</span> Sedang mengecek database...</span>';
-=======
-        typingIndicator.innerHTML = '<span class="animate-pulse">Mengetik...</span>';
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
+        typingIndicator.innerHTML = '<span class="flex items-center gap-2"><span class="animate-spin material-icons text-sm">sync</span> Sedang mengetik...</span>';
         chatMessages.appendChild(typingIndicator);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Disable send button
-        chatSend.disabled = true;
-        chatInput.disabled = true;
-
         try {
-<<<<<<< HEAD
             const sessionId = getChatSessionId();
-
-=======
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
             const response = await fetch('api/chatbot_bridge.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-<<<<<<< HEAD
-                body: JSON.stringify({
-                    message: message,
-                    session_id: sessionId
-                })
-=======
-                body: JSON.stringify({ message: message })
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message, session_id: sessionId })
             });
 
             const result = await response.json();
 
-            // Remove typing indicator
-            typingIndicator.remove();
+            if (document.getElementById('typing-indicator')) document.getElementById('typing-indicator').remove();
 
-            // Add bot response
             const botMsg = document.createElement('div');
             botMsg.className = 'chat-message bot shadow-sm';
-<<<<<<< HEAD
 
-            // Handle output format as requested: { "output": "..." }
-            if (result.output) {
-                botMsg.textContent = result.output;
+            // --- Safe Output Handling ---
+            let finalText = "";
+            let finalSuggestions = [];
+
+            if (result.reply) {
+                finalText = result.reply;
+                finalSuggestions = result.suggestions || [];
+            } else if (result.output) {
+                let rawOutput = result.output;
+                rawOutput = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+                try {
+                    if (rawOutput.trim().startsWith('{')) {
+                        const parsedObj = JSON.parse(rawOutput);
+                        finalText = parsedObj.reply || rawOutput;
+                        finalSuggestions = parsedObj.suggestions || [];
+                    } else {
+                        finalText = rawOutput;
+                    }
+                } catch (e) {
+                    finalText = rawOutput;
+                }
             } else {
-                botMsg.textContent = 'Maaf, format respon tidak sesuai.';
-                console.warn('Unexpected response format:', result);
+                finalText = "Maaf, respon kosong dari server.";
             }
 
-=======
-            botMsg.textContent = result.reply || 'Maaf, terjadi kesalahan.';
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
+            botMsg.textContent = finalText;
             chatMessages.appendChild(botMsg);
+
+            if (finalSuggestions.length > 0) {
+                renderSuggestions(finalSuggestions);
+            }
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
         } catch (error) {
             console.error('Chat error:', error);
+            if (document.getElementById('typing-indicator')) document.getElementById('typing-indicator').remove();
 
-            // Remove typing indicator
-            if (document.getElementById('typing-indicator')) {
-                document.getElementById('typing-indicator').remove();
-            }
-
-<<<<<<< HEAD
-            // Show polite error message
             const errorMsg = document.createElement('div');
-            errorMsg.className = 'chat-message bot shadow-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400';
-            errorMsg.textContent = '⚠️ Maaf, saya sedang mengalami kendala teknis. Mohon coba beberapa saat lagi.';
-=======
-            // Show error message
-            const errorMsg = document.createElement('div');
-            errorMsg.className = 'chat-message bot shadow-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400';
-            errorMsg.textContent = '⚠️ Maaf, sistem chatbot sedang sibuk. Silakan coba lagi.';
->>>>>>> d608fc8a5382f4fb89c137aadcf92e0369de5f59
+            errorMsg.className = 'chat-message bot shadow-sm bg-red-50 text-red-600';
+            errorMsg.textContent = '⚠️ Gangguan koneksi. Silakan coba lagi.';
             chatMessages.appendChild(errorMsg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
         } finally {
-            // Re-enable send button
             chatSend.disabled = false;
             chatInput.disabled = false;
-            chatInput.focus();
+            if (!silent) chatInput.focus();
         }
     }
 
